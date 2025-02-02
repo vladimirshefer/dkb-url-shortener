@@ -30,3 +30,32 @@ think of libraries/ components you could use to fulfill the task.
   possible solution to identify problems
   Have fun with our coding challenge. If you have any questions, don’t hesitate to
   ask.
+
+## Documentation
+
+### Tech stack
+- Spring Boot 3 (Web, Data)
+- Postgres or H2 Database
+
+### Usage
+1. Create a short url
+
+    ```http
+    POST /url
+    
+    https://example.com/long.url
+    ```
+    ```
+    200 OK
+    
+    6BhLm9k0hn78
+    ```
+
+1. Get a full URL by short URL.
+    ```http
+    GET /url/6BhLm9k0hn78
+    ```
+    ```
+    302 Found
+    Location: https://example.com/long.url
+    ```
