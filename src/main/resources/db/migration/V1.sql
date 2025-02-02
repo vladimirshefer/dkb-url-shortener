@@ -1,0 +1,6 @@
+CREATE TABLE url_table
+(
+    id       VARCHAR(128) PRIMARY KEY,
+    full_url VARCHAR(4096) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

@@ -1,22 +1,40 @@
 package com.example.urlshortener.controller
 
-import com.example.urlshortener.id_generator.IdGenerator
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import com.example.urlshortener.service.UrlService
+import jakarta.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.server.ResponseStatusException
+import java.net.URI
 
 @RestController
 @RequestMapping("/url")
 class UrlController(
-    private val idGenerator: IdGenerator
+    private val urlService: UrlService
 ) {
 
     @PostMapping
     fun shortenUrl(
-        @RequestBody url: String?
+        @RequestBody url: String
     ): String {
-        return idGenerator.generate()
+        try {
+            URI(url).toURL()
+        } catch (e: Exception) {
+            throw ResponseStatusException(SC_BAD_REQUEST, "Invalid url", e)
+        }
+        return urlService.create(url)
+    }
+
+    @GetMapping("{id}")
+    fun findUrl(
+        @PathVariable id: String
+    ): ResponseEntity<Void> {
+        val fullUrl = urlService.get(id) ?: throw ResponseStatusException(HttpServletResponse.SC_NOT_FOUND, "Invalid id: $id", null)
+
+        return ResponseEntity.status(302)
+            .location(URI.create(fullUrl))
+            .build()
     }
 
 }
