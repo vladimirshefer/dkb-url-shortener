@@ -3,6 +3,7 @@ package com.example.urlshortener.controller
 import com.example.urlshortener.service.UrlService
 import jakarta.servlet.http.HttpServletResponse
 import jakarta.servlet.http.HttpServletResponse.SC_BAD_REQUEST
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.http.CacheControl
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -28,6 +29,7 @@ class UrlController(
         return urlService.create(url)
     }
 
+    @Cacheable("cache_get_full_url")
     @GetMapping("{id}")
     fun findUrl(
         @PathVariable id: String
