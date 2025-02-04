@@ -21,7 +21,7 @@ class UrlService(
         // therefore >99,999999% chance after 10 retries.
         return retry(RETRY_TIMES) {
             val id = idGenerator.generate()
-            urlRepository.save(
+            urlRepository.insert(
                 UrlEntity().also {
                     it.id = id
                     it.fullUrl = fullUrl

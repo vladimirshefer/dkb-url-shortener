@@ -114,4 +114,28 @@ internal class UrlControllerTest {
         }
         verify(urlService).get(testId) // cache should handle second request
     }
+
+    @Test
+    fun id_clash() {
+        val testId = "fixed"
+        doReturn(testId).`when`(idGenerator).generate()
+        val fullUrl = "http://www.mylongurl.com/foo"
+
+        val postResponse = rest.postForEntity<String>(
+            "/url",
+            fullUrl
+        )
+        assertEquals(SC_OK, postResponse.statusCode.value())
+        assertEquals(testId, postResponse.body)
+
+        val postResponse2 = rest.postForEntity<String>(
+            "/url",
+            "http://www.mylongurl.com/bar"
+        )
+        assertEquals(SC_INTERNAL_SERVER_ERROR, postResponse2.statusCode.value())
+
+        val getResponse = rest.getForEntity<Unit>("/url/$testId")
+        assertEquals(SC_MOVED_TEMPORARILY, getResponse.statusCode.value())
+        assertEquals(fullUrl, getResponse.headers.location.toString())
+    }
 }
