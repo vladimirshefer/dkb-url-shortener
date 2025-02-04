@@ -34,8 +34,19 @@ think of libraries/ components you could use to fulfill the task.
 ## Documentation
 
 ### Tech stack
-- Spring Boot 3 (Web, Data)
+- Spring Boot 3 (Web, Data, Cache)
 - Postgres or H2 Database
+- Flyway
+
+### Setup
+To run the service use the following command:
+```sh
+docker-compose up -d --build
+```
+This command will
+- Test and Build the Application
+- Pack the Application in Docker image
+- Run the Application and Postgres in Docker
 
 ### Usage
 1. Create a short url
