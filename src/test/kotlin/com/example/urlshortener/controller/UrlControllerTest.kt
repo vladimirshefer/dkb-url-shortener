@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
 import org.springframework.boot.test.web.client.TestRestTemplate
 import org.springframework.boot.test.web.client.getForEntity
 import org.springframework.boot.test.web.client.postForEntity
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
@@ -27,6 +28,7 @@ import kotlin.random.Random
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 internal class UrlControllerTest {
 
     @Autowired
@@ -138,4 +140,38 @@ internal class UrlControllerTest {
         assertEquals(SC_MOVED_TEMPORARILY, getResponse.statusCode.value())
         assertEquals(fullUrl, getResponse.headers.location.toString())
     }
+
+    /**
+     * In application-test.properties specified the rate limiting to 4 requests per second.
+     */
+    @Test
+    fun rate_limit() {
+        doAnswer({ Random.nextInt().absoluteValue.toString() })
+            .`when`(idGenerator).generate()
+        val fullUrl = "http://www.mylongurl.com/foo"
+
+        (1..10)
+            .map { it to rest.postForEntity<String>("/url", fullUrl) }
+            .forEach {
+                if (it.first <= 4) {
+                    assertEquals(200, it.second.statusCode.value())
+                } else {
+                    assertEquals(429, it.second.statusCode.value())
+                }
+            }
+
+        Thread.sleep(1000) // wait for rate limiting to reset
+
+        (1..10)
+            .map { it to rest.postForEntity<String>("/url", fullUrl) }
+            .forEach {
+                if (it.first <= 4) {
+                    assertEquals(200, it.second.statusCode.value())
+                } else {
+                    assertEquals(429, it.second.statusCode.value())
+                }
+            }
+
+    }
+
 }
