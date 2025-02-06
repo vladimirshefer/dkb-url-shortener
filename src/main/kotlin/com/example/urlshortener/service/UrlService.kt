@@ -4,6 +4,7 @@ import com.example.urlshortener.entity.UrlEntity
 import com.example.urlshortener.id_generator.IdGenerator
 import com.example.urlshortener.repository.UrlRepository
 import com.example.urlshortener.util.retry
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,6 +30,8 @@ class UrlService(
             )
             id
         }
+            .onFailure { LOG.error("Error saving URL", it) }
+            .getOrThrow()
     }
 
     fun get(id: String): String? {
@@ -37,5 +40,7 @@ class UrlService(
 
     companion object {
         private const val RETRY_TIMES = 10
+
+        private val LOG = LoggerFactory.getLogger(UrlService::class.java)
     }
 }

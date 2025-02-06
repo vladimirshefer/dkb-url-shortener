@@ -1,16 +1,14 @@
 package com.example.urlshortener.util
 
-import com.example.urlshortener.entity.UrlEntity
-
-fun <R> retry(times: Int, block: () -> R): R {
+fun <R> retry(times: Int, block: () -> R): Result<R> {
     var retries = times
     var lastException: Exception? = null
     while (retries-- > 0) {
         try {
-            return block()
+            return Result.success(block())
         } catch (e: Exception) {
             lastException = e
         }
     }
-    throw lastException ?: IllegalStateException("Out of retries")
+    return Result.failure(lastException ?: IllegalStateException("Out of retries"))
 }
